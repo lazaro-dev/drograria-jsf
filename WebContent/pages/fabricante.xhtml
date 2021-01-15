@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	template="/templates/modeloSistema.xhtml">
+	
+	<ui:define name="menu">  
+		<ui:include src="/include/menuPrincipal.xhtml"/>
+	</ui:define>
+	
+	<ui:define name="conteudo">
+		<h:form id="frmFabListagem">
+			<p:dataTable id="tblFabricantes"
+						 widgetVar="tabelaFabricante"
+						 emptyMessage="Nenhum registro encontrado"
+						 value="#{MBFabricante.itens}"
+						 var="item" 
+						 filterEvent="#{MBFabricante.itensFiltrados}"
+						 paginator="true"
+						 rows="8">
+						 
+				<f:facet name="header">
+					Fabicante - Listagem
+				</f:facet>
+				
+				<p:column headerText="Código" sortBy="#{item.codFab}" filterBy="#{item.codFab}">
+					<h:outputText value="#{item.codFab}"/>
+				</p:column>
+				
+				<p:column headerText="Descrição" sortBy="#{item.descricao}" filterBy="#{item.descricao}">
+					<h:outputText value="#{item.descricao}"/> 
+				</p:column>
+				
+				<p:column headerText="Opções">
+					<p:commandButton icon="ui-icon-trash" oncomplete="dlg1.show();"
+									 update=":frmFabExcluir:pnlFabExcluir">
+						<f:setPropertyActionListener value="#{item}" target="#{MBFabricante.fabricante}"/>
+					</p:commandButton>
+									 
+					<p:commandButton icon="ui-icon-pencil" oncomplete="dlg2.show();"
+									 update=":frmFabEditar:pnlFabEditar">
+						<f:setPropertyActionListener value="#{item}" target="#{MBFabricante.fabricante}"/>
+					</p:commandButton>
+									 
+				</p:column>
+				<f:facet name="footer">
+					<p:commandButton value="Novo" 
+									 actionListener="#{MBFabricante.prepararNovo}" 
+									 oncomplete ="dlg.show();"
+									 update=":msgGlobal :frmFabNovo:pnlFabNovo"/>
+				</f:facet>
+			
+			</p:dataTable>
+		</h:form>
+		
+		<p:dialog widgetVar="dlg" closable="false" 
+				  draggable="false" resizable="false"
+				  modal="true" appendToBody="true"
+				  header="Fabricante - Novo" height="100">
+			<h:form id="frmFabNovo">
+			
+				<h:panelGrid id="pnlFabNovo" columns="2">
+					<p:outputLabel for="txtDescFabNovo" value="Descrição:"/>
+					<p:inputText id="txtDescFabNovo" size="30" maxlength="50"
+					value="#{MBFabricante.fabricante.descricao}"
+					required="true" requiredMessage="Campo descrição Obrigatório!!"/>
+				</h:panelGrid>
+				
+				<h:panelGrid columns="2">
+					<p:commandButton value="Gravar" actionListener="#{MBFabricante.novoFabricante}"
+									 oncomplete="verificar(xhr, status, args, dlg, tabelaFabricante);"
+									 update=":msgGlobal :frmFabListagem:tblFabricantes"/>
+					<p:commandButton value="Cancelar" oncomplete="dlg.hide();" process="@this">
+						
+					</p:commandButton>
+				</h:panelGrid>
+				 
+			</h:form>
+		</p:dialog>
+		
+		<p:dialog  widgetVar="dlg1" closable="false" 
+				   draggable="false" resizable="false"
+				   modal="true" appendToBody="true"
+				   header="Fabricante - Excluir" >
+				   
+		   <h:form id="frmFabExcluir">
+		   		<h:panelGrid id="pnlFabExcluir" columns="2">
+		   			<h:outputText value="Código:"/>
+		   			<h:outputText value="#{MBFabricante.fabricante.codFab}"/>
+		   			
+		   			<h:outputText value="Descrição:"/>
+		   			<h:outputText value="#{MBFabricante.fabricante.descricao}"/>
+		   		</h:panelGrid>
+		   		
+		   		<h:panelGrid columns="2">
+		   			<p:commandButton value="Excluir" actionListener="#{MBFabricante.excluir}"
+		   							 oncomplete="dlg1.hide(); tabelaFabricantes.clearFilters();"
+		   							 update=":msgGlobal :frmFabListagem:tblFabricantes"/>
+		   			<p:commandButton value="Cancelar" onclick="dlg1.hide();" process="@this"/>
+		   		</h:panelGrid>
+		   </h:form>
+		</p:dialog>
+		
+		<p:dialog  widgetVar="dlg2" closable="false" 
+				   draggable="false" resizable="false"
+				   modal="true" appendToBody="true"
+				   header="Fabricante - Editar" >
+				   
+		   <h:form id="frmFabEditar">
+		   		<h:panelGrid id="pnlFabEditar" columns="2">
+		   			<h:outputLabel value="Código"/>
+		   			<h:outputText value="#{MBFabricante.fabricante.codFab}"/>
+		   			
+		   			<p:outputLabel for="txtDescFabEditar" value="Descrição:"/>
+		   			<p:inputText id="txtDescFabEditar" 
+		   				         value="#{MBFabricante.fabricante.descricao}" size="30"
+		   						 maxlength="50"
+		   						 required="true"
+		   						 requiredMessage="Campo Descrição Obrigatorio!!"/>
+		   		</h:panelGrid>
+		   		
+		   		<h:panelGrid columns="2">
+		   			<p:commandButton value="Editar" actionListener="#{MBFabricante.editar}"
+		   							 oncomplete="verificar(xhr, status, args, dlg2,tabelaFabricante);"
+		   							 update=":msgGlobal :frmFabListagem:tblFabricantes"/>
+		   							 
+		   			<p:commandButton value="Cancelar" onclick="dlg2.hide(); tabelaFabricantes.clearFilters();" process="@this"/>
+		   		</h:panelGrid>
+		   </h:form>
+		</p:dialog>
+	</ui:define>
+
+</ui:composition>
